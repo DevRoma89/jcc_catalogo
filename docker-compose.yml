@@ -1,0 +1,37 @@
+ 
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver_jcc
+    environment:
+      SA_PASSWORD: "Password123!"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+
+  api:
+    build:
+      context: ./server
+      dockerfile: GestionJcc/Dockerfile
+    container_name: api_jcc
+    ports:
+      - "5000:8080"
+    depends_on:
+      - sqlserver
+    environment:
+      ConnectionStrings__DefaultConnection: "Server=sqlserver;Database=JccDb;User=sa;Password=Password123!;TrustServerCertificate=True"
+
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: frontend_jcc
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+
+volumes:
+  sql_data:
