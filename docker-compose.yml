@@ -4,34 +4,60 @@ services:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: sqlserver_jcc
     environment:
+      MSSQL_MEMORY_LIMIT_MB: 1500
       SA_PASSWORD: "Password123!"
       ACCEPT_EULA: "Y"
     ports:
       - "1433:1433"
     volumes:
       - sql_data:/var/opt/mssql
-
+    networks: 
+      - proxy
   api:
     build:
       context: ./server
       dockerfile: GestionJcc/Dockerfile
     container_name: api_jcc
-    ports:
-      - "5000:8080"
+    expose:
+      - "8080"
     depends_on:
       - sqlserver
     environment:
       ConnectionStrings__DefaultConnection: "Server=sqlserver;Database=JccDb;User=sa;Password=Password123!;TrustServerCertificate=True"
+    networks: 
+      - proxy
 
   frontend:
     build:
       context: ./client
       dockerfile: Dockerfile
     container_name: frontend_jcc
-    ports:
-      - "3000:80"
+    expose:
+      - "80"
     depends_on:
       - api
+    networks:
+      - proxy
+
+  nginx-proxy-manager:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: nginx_proxy_manager
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "81:81"
+      - "443:443"
+    volumes:
+      - npm_data:/data
+      - npm_letsencrypt:/etc/letsencrypt
+    networks:
+      - proxy
 
 volumes:
   sql_data:
+  npm_data: 
+  npm_letsencrypt: 
+
+networks: 
+  proxy:
+    driver: bridge 
