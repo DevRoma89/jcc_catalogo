@@ -27,7 +27,7 @@ namespace GestionJcc.Controllers
                 return BadRequest("Formato de imagen no permitido.");
 
             // Guardar en wwwroot/imagenes
-            var carpeta = Path.Combine(_env.WebRootPath, "imagenes");
+            var carpeta = Path.Combine(_env.ContentRootPath, "uploads");
             Directory.CreateDirectory(carpeta);
 
             var nombreArchivo = $"{Guid.NewGuid()}{extension}";
@@ -38,7 +38,7 @@ namespace GestionJcc.Controllers
                 await archivo.CopyToAsync(stream);
             }
 
-            var url = $"{Request.Scheme}://{Request.Host}/imagenes/{nombreArchivo}";
+            var url = $"{Request.Scheme}://{Request.Host}/api/uploads/{nombreArchivo}";
 
             return Ok(new { url });
         }
