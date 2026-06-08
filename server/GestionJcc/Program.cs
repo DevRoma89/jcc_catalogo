@@ -48,15 +48,25 @@ using (var scope = app.Services.CreateScope())
 
 // =====================
 // MIDDLEWARES
-// =====================
-if (app.Environment.IsDevelopment())
+// ====================
+app.UseSwagger(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    c.RouteTemplate = "api/swagger/{documentName}/swagger.json";
+});
+
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/api/swagger/v1/swagger.json", "API V1");
+    c.RoutePrefix = "api/swagger";
+});
+
 
 // 🔴 IMPORTANTE: servir archivos estáticos desde wwwroot
-app.UseStaticFiles(); // 👉 esto expone wwwroot automáticamente
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    RequestPath = "/api/imagenes"
+});
 
 app.UseCors("AllowAll");
 
